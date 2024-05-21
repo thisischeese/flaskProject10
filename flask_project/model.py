@@ -17,6 +17,14 @@ class Info(Base):
     id = Column(String(40))
 
 
+class History(Info):
+    __tablename__ = 'history'
+
+    sheetCnt = Column(SmallInteger)
+    wrongCnt = Column(SmallInteger)
+    email = Column(ForeignKey('info.email'), primary_key=True)
+
+
 class Worksheet(Base):
     __tablename__ = 'worksheet'
 
@@ -24,17 +32,6 @@ class Worksheet(Base):
     image = Column(String(500))
     meaning = Column(String(100), nullable=False)
     subject = Column(TINYINT, nullable=False, comment='1,2,3')
-
-
-class History(Base):
-    __tablename__ = 'history'
-
-    date = Column(Date, primary_key=True)
-    sheetCnt = Column(SmallInteger)
-    wrongCnt = Column(SmallInteger)
-    email = Column(ForeignKey('info.email'), nullable=False, index=True)
-
-    info = relationship('Info')
 
 
 class Note(Base):
@@ -48,3 +45,10 @@ class Note(Base):
 
     info = relationship('Info')
     worksheet = relationship('Worksheet')
+
+'''
+# DB 새롭게 생성 시에만 실행
+engine = create_engine(config.DB_URL)
+Base.metadata.create_all(engine)
+'''
+
