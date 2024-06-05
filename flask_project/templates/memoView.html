@@ -10,13 +10,18 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f7;
         }
         .container {
-            width: 80%;
+            width: 90%;
             max-width: 600px;
             text-align: center;
             position: relative;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
         #updateButton {
             position: absolute;
@@ -25,8 +30,11 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+            z-index: 10;
         }
         #backButton {
             position: absolute;
@@ -35,20 +43,30 @@
             background-color: #008CBA;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none; /* Remove underline */
+            font-size: 14px;
         }
         #backButton:hover {
             background-color: #005f6b; /* Darker color on hover */
         }
+        h1 {
+            margin: 0;
+            padding: 20px 0;
+            background-color: #f5f5f7;
+            border-bottom: 1px solid #ddd;
+        }
         .memo-box {
             width: 100%;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
             box-sizing: border-box;
             text-align: left;
+        }
+        .memo-box:last-child {
+            border-bottom: none;
         }
         .memo-box label {
             display: block;
@@ -59,13 +77,17 @@
             width: 100%;
             border: none;
             background: none;
-            font-size: 16px;
+            font-size: 18px;
             font-family: inherit; /* Match the font with Word field */
             box-sizing: border-box;
-            text-align: center; /* Center-align the input fields */
+            text-align: left;
         }
         .memo-box input:disabled, .memo-box textarea:disabled {
             color: #000;
+        }
+        .memo-box textarea {
+            resize: none;
+            height: 200px;
         }
     </style>
     <script>
@@ -115,7 +137,7 @@
 </head>
 <body>
     <div class="container">
-        <a id="backButton" href="/mynote/{{ my_id }}/list">Back to Memo List</a>
+        <a id="backButton" href="/mynote/{{ my_id }}/list">Back</a>
         <button id="updateButton">Update Memo</button>
         <h1>Memo View</h1>
         <div class="memo-box">

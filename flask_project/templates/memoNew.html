@@ -3,6 +3,7 @@
 <head>
     <title>New Memo</title>
     <style>
+        /* Existing CSS styles */
         body {
             display: flex;
             flex-direction: column;
@@ -10,13 +11,18 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f7;
         }
         .container {
-            width: 80%;
+            width: 90%;
             max-width: 600px;
             text-align: center;
             position: relative;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
         #saveButton {
             position: absolute;
@@ -25,24 +31,45 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+            z-index: 10;
+        }
+        h1 {
+            margin: 0;
+            padding: 20px 0;
+            background-color: #f5f5f7;
+            border-bottom: 1px solid #ddd;
         }
         .memo-box {
             width: 100%;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
             box-sizing: border-box;
+            text-align: left;
+        }
+        .memo-box:last-child {
+            border-bottom: none;
+        }
+        .memo-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         .memo-box input, .memo-box textarea {
             width: 100%;
             border: none;
             background: none;
-            font-size: 16px;
+            font-size: 18px;
+            font-family: inherit;
             box-sizing: border-box;
-            font-family: inherit; /* Match the font with the parent container */
-            text-align: center; /* Center align the input fields */
+            text-align: left;
+        }
+        .memo-box textarea {
+            resize: none;
+            height: 200px;
         }
     </style>
     <script>
@@ -50,6 +77,29 @@
             document.getElementById("saveButton").addEventListener("click", function() {
                 let word = document.getElementById("memoWord").value;
                 let memo = document.getElementById("memoText").value;
+
+                fetch(`/mynote/check_word/{{ my_id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ word: word })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        saveMemo(word, memo);
+                    } else {
+                        alert("Word not found in your worksheet.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Failed to check word");
+                });
+            });
+
+            function saveMemo(word, memo) {
                 fetch(`/mynote/{{ my_id }}/new`, {
                     method: 'POST',
                     headers: {
@@ -65,13 +115,18 @@
                     } else {
                         alert("Failed to save memo");
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Failed to save memo");
                 });
-            });
+            }
         });
     </script>
 </head>
 <body>
     <div class="container">
+        <button id="saveButton">Save</button>
         <h1>New Memo</h1>
         <div class="memo-box">
             <label>Word:</label>
@@ -81,7 +136,6 @@
             <label>Memo:</label>
             <textarea id="memoText"></textarea>
         </div>
-        <button id="saveButton">Save Memo</button>
     </div>
 </body>
 </html>
