@@ -77,32 +77,50 @@ def readNote(my_id, mynote_seq):
             return jsonify(user_note_data)
 
 
-@app.route('/mynote/<string:my_id>/new', methods=['POST','GET'])
-# memoNew.html에서 /mynote/<string:my_id>/new 엔드포인트에 대한 POST 요청을 처리
+@app.route('/mynote/<string:my_id>/new', methods=['POST'])
 def newNoteRoute(my_id):
     data = request.json
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
     my_word = data.get('word')
     my_memo = data.get('memo')
     return newNote(my_id, my_word, my_memo)
 
-# memoNew 화면에서 새로운 노트 생성함
 def newNote(my_id, my_word, my_memo):
     user_info = session.query(Info).filter_by(id=my_id).first()
     if not user_info:
         return jsonify({"error": "id not found"}), 404
-    else:
-        max_seq = session.query(Note).filter_by(email=user_info.email).order_by(Note.seq.desc()).first()
-        new_seq = 1 if max_seq is None else max_seq.seq + 1
-        new_note = Note(
-            seq=new_seq,
-            date=func.current_date(),
-            memo=my_memo,
-            word=my_word,
-            email=user_info.email
-        )
-        session.add(new_note)
-        session.commit()
-        return jsonify({"success": "successfully created new memo"})
+
+    max_seq = session.query(Note).filter_by(email=user_info.email).order_by(Note.seq.desc()).first()
+    new_seq = 1 if max_seq is None else max_seq.seq + 1
+    new_note = Note(
+        seq=new_seq,
+        date=func.current_date(),
+        memo=my_memo,
+        word=my_word,
+        email=user_info.email
+    )
+    session.add(new_note)
+    session.commit()
+    return jsonify({"success": "successfully created new memo"})
+
+
+@app.route('/mynote/check_word/<string:my_id>', methods=['POST'])
+def checkWordRoute(my_id):
+    data = request.json
+    if not data or 'word' not in data:
+        return jsonify({"error": "Invalid request data"}), 400
+
+    my_word = data['word']
+    exists = checkWord(my_word)  # Check if the word exists
+
+    return jsonify({"exists": exists}), 200
+
+def checkWord(my_word):
+    # Logic to check if the word exists in the worksheet
+    worksheet_word = session.query(Worksheet).filter_by(word=my_word).first()
+    return worksheet_word is not None
 
 @app.route('/mynote/<string:my_id>/<int:mynote_seq>/update', methods=['POST','GET'])
 # memoView 화면에서 기존에 존재하는 노트의 메모 내용을 업데이트
@@ -118,6 +136,7 @@ def updateMemo(my_id, mynote_seq):
     user_note.memo = new_memo
     session.commit()
     return jsonify({"success": "Memo updated successfully"}), 200
+
 
 @app.route('/mynote/<string:my_id>/list')
 # 메모 리스트 화면 접속
