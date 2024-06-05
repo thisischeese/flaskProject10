@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Memo View</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+        #updateButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #backButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline */
+        }
+        #backButton:hover {
+            background-color: #005f6b; /* Darker color on hover */
+        }
+        .memo-box {
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        .memo-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .memo-box input, .memo-box textarea {
+            width: 100%;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-family: inherit; /* Match the font with Word field */
+            box-sizing: border-box;
+            text-align: center; /* Center-align the input fields */
+        }
+        .memo-box input:disabled, .memo-box textarea:disabled {
+            color: #000;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let isEditMode = false;
+            let memoData = {};
+
+            function fetchMemo() {
+                fetch(`/mynote/{{ my_id }}/{{ mynote_seq }}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        memoData = data;
+                        document.getElementById("memoDate").value = memoData.date;
+                        document.getElementById("memoWord").value = memoData.word;
+                        document.getElementById("memoText").value = memoData.memo;
+                    });
+            }
+
+            document.getElementById("updateButton").addEventListener("click", function() {
+                if (isEditMode) {
+                    let updatedMemo = document.getElementById("memoText").value;
+                    fetch(`/mynote/{{ my_id }}/{{ mynote_seq }}/update`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ memo: updatedMemo })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Memo updated successfully");
+                            fetchMemo();
+                        } else {
+                            alert(data.error);
+                        }
+                    });
+                }
+                isEditMode = !isEditMode;
+                document.getElementById("memoText").disabled = !isEditMode;
+                this.textContent = isEditMode ? "Save Memo" : "Update Memo";
+            });
+
+            fetchMemo();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <a id="backButton" href="/mynote/{{ my_id }}/list">Back to Memo List</a>
+        <button id="updateButton">Update Memo</button>
+        <h1>Memo View</h1>
+        <div class="memo-box">
+            <label>Date:</label>
+            <input type="text" id="memoDate" disabled>
+        </div>
+        <div class="memo-box">
+            <label>Word:</label>
+            <input type="text" id="memoWord" disabled>
+        </div>
+        <div class="memo-box">
+            <label>Memo:</label>
+            <textarea id="memoText" disabled></textarea>
+        </div>
+    </div>
+</body>
+</html>

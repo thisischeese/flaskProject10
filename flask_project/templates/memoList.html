@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Memo List</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+        #deleteButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #memoList {
+            list-style-type: none;
+            padding: 0;
+        }
+        .memo-item {
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .memo-item:hover {
+            background-color: #f1f1f1;
+        }
+        .delete-mode .memo-item {
+            border: 1px solid red;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let deleteMode = false;
+
+            function fetchNotes() {
+                fetch('/mynote/{{ my_id }}/')
+                    .then(response => response.json())
+                    .then(data => {
+                        let memoList = document.getElementById("memoList");
+                        memoList.innerHTML = ''; // Clear existing notes
+                        data.forEach(note => {
+                            let listItem = document.createElement("li");
+                            listItem.textContent = note.word;
+                            listItem.className = "memo-item";
+                            listItem.onclick = function() {
+                                if (deleteMode) {
+                                    if (confirm(`Are you sure you want to delete the note: "${note.word}"?`)) {
+                                        fetch(`/mynote/{{ my_id }}/${note.seq}/delete/`, {
+                                            method: 'DELETE'
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                alert("Note deleted successfully");
+                                                fetchNotes(); // Refresh the notes list
+                                            } else {
+                                                alert(data.error);
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    window.location.href = `/mynote/{{ my_id }}/${note.seq}/view`;
+                                }
+                            };
+                            memoList.appendChild(listItem);
+                        });
+                    });
+            }
+
+            document.getElementById("deleteButton").addEventListener("click", function() {
+                deleteMode = !deleteMode;
+                let memoList = document.getElementById("memoList");
+                if (deleteMode) {
+                    memoList.classList.add("delete-mode");
+                    this.textContent = "Cancel Delete";
+                } else {
+                    memoList.classList.remove("delete-mode");
+                    this.textContent = "Delete Note";
+                }
+            });
+
+            fetchNotes(); // Initial fetch of notes
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <button id="deleteButton">Delete Note</button>
+        <h1>Memo List</h1>
+        <ul id="memoList"></ul>
+    </div>
+</body>
+</html>

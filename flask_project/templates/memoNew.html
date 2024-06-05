@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Memo</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+        #saveButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .memo-box {
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        .memo-box input, .memo-box textarea {
+            width: 100%;
+            border: none;
+            background: none;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: inherit; /* Match the font with the parent container */
+            text-align: center; /* Center align the input fields */
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("saveButton").addEventListener("click", function() {
+                let word = document.getElementById("memoWord").value;
+                let memo = document.getElementById("memoText").value;
+                fetch(`/mynote/{{ my_id }}/new`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ word: word, memo: memo })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Memo saved successfully");
+                        // Redirect to Memo List page or perform any other action as needed
+                    } else {
+                        alert("Failed to save memo");
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>New Memo</h1>
+        <div class="memo-box">
+            <label>Word:</label>
+            <input type="text" id="memoWord">
+        </div>
+        <div class="memo-box">
+            <label>Memo:</label>
+            <textarea id="memoText"></textarea>
+        </div>
+        <button id="saveButton">Save Memo</button>
+    </div>
+</body>
+</html>
